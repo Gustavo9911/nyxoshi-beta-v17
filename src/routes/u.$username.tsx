@@ -20,19 +20,8 @@ const PROFILE_QUERY_TIMEOUT_MS = 12_000;
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs = PROFILE_QUERY_TIMEOUT_MS): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error("O carregamento do perfil demorou demais. Tente novamente."));
-    }, timeoutMs);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
+    const timer = setTimeout(() => reject(new Error("O carregamento do perfil demorou demais. Tente novamente.")), timeoutMs);
+    promise.then((value) => { clearTimeout(timer); resolve(value); }, (error) => { clearTimeout(timer); reject(error); });
   });
 }
 
@@ -45,35 +34,23 @@ function ProfileInner() {
   const profile = useQuery({
     queryKey: ["profile", username],
     queryFn: () => withTimeout(getProfileByUsername({ data: username })),
-    staleTime: 15_000,
-    retry: 1,
-    retryDelay: 500,
-    refetchOnWindowFocus: false,
+    staleTime: 15_000, retry: 1, retryDelay: 500, refetchOnWindowFocus: false,
   });
   const [tab, setTab] = useState<"posts" | "reposts" | "likes">("posts");
   const posts = useQuery({
     queryKey: ["profile-posts", username],
     queryFn: () => withTimeout(getProfilePosts({ data: username })),
-    enabled: tab === "posts",
-    retry: 1,
-    retryDelay: 500,
-    refetchOnWindowFocus: false,
+    enabled: tab === "posts", retry: 1, retryDelay: 500, refetchOnWindowFocus: false,
   });
   const reposts = useQuery({
     queryKey: ["profile-reposts", username],
     queryFn: () => withTimeout(getProfileReposts({ data: username })),
-    enabled: tab === "reposts",
-    retry: 1,
-    retryDelay: 500,
-    refetchOnWindowFocus: false,
+    enabled: tab === "reposts", retry: 1, retryDelay: 500, refetchOnWindowFocus: false,
   });
   const likes = useQuery({
     queryKey: ["profile-likes", username],
     queryFn: () => withTimeout(getProfileLikes({ data: username })),
-    enabled: tab === "likes",
-    retry: 1,
-    retryDelay: 500,
-    refetchOnWindowFocus: false,
+    enabled: tab === "likes", retry: 1, retryDelay: 500, refetchOnWindowFocus: false,
   });
   const [reportOpen, setReportOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -97,17 +74,8 @@ function ProfileInner() {
   if (profile.isError) {
     return (
       <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-        <p className="text-sm text-destructive">
-          Não foi possível carregar este perfil. Tente novamente.
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => void profile.refetch()}
-        >
-          Tentar novamente
-        </Button>
+        <p className="text-sm text-destructive">Não foi possível carregar este perfil. Tente novamente.</p>
+        <Button type="button" variant="outline" size="sm" onClick={() => void profile.refetch()}>Tentar novamente</Button>
       </div>
     );
   }

@@ -1,45 +1,52 @@
-# Nyxoshi V13–V17 — auditoria técnica e correções finais
+# Nyxoshi V15–V17 — auditoria técnica
 
 ## Escopo
-- V13: autenticação, cargos/permissões, moderação, mensagens e responsividade mobile.
 - V15: perfil, temas, fundos, efeitos, introdução, mídia do perfil e responsividade.
-- V16: áudio, player, mídia em posts, áudio original e compartilhamento.
-- V17: feed de vídeos, reprodução vertical, controles, upload, interações e compartilhamento.
-- V18: não implementada; permanece fora deste pacote.
+- V16: áudio, mídia em posts, áudio original e compartilhamento.
+- V17: aba de vídeos, reprodução inline, upload, URLs externas e compartilhamento.
+- V18: **não implementada**; reservada para votação/aprovação no Discord.
 
-## Correções finais aplicadas
-- Corrigido o carregamento de perfis públicos autenticados: a consulta pública agora usa uma única query parametrizada com ordem explícita (`$1 = viewerId`, `$2 = username`), evitando cruzamento entre username e user_id.
-- O perfil público não depende mais da sequência de consultas de hidratação para contagens/seguimento, reduzindo pontos de falha e latência.
-- A hidratação normal de perfil evita queries concorrentes no fallback PGlite de conexão única.
-- `permanent_id` usa o valor já retornado pela linha do perfil, sem consulta extra.
-- O carregamento de perfil, publicações, reposts e curtidas ganhou timeout de 12 s, retry controlado e não refaz fetch ao trocar o foco da janela.
-- Mantidas as proteções de shadow-ban, bloqueios e privacidade no carregamento do perfil.
-- Adicionados índices para consultas de followers, blocks, mutes e restrictions (`0012_v17_profile_query_indexes.sql`).
-- V15: personalização persistida é exposta corretamente no perfil público.
-- V15: mídia de perfil grande/inline é entregue via endpoint dedicado.
-- V16/V17: mídia local de posts e miniaturas usa endpoints dedicados; uploads ficam em limites compatíveis com payload serverless.
-- V16/V17: URLs externas ambíguas para OGG/WebM exigem tipo de mídia explícito.
-- Menções em comentários usam exatamente um alvo.
-- Ações de perfil e mensagens usam layouts delimitados para telas móveis.
-- Ações autenticadas continuam protegidas no servidor; atualização de cargos privilegiados não depende apenas da interface.
-- Nomes de arquivos do pacote não contêm referências a `grok`, `gemini`, `openai`, `claude`, `llama` ou `mistral`.
-- `.vercel/` permanece fora do versionamento pelo `.gitignore`.
+## Correções principais
+- Corrigido o carregamento da personalização V15 em perfis públicos, busca e sugestões: os campos persistidos agora são selecionados e hidratados corretamente.
+- Corrigida a criação de menções em comentários, que podia violar a restrição de exatamente um alvo em `mentions`.
+- Alinhados os limites de upload de post com o teto de payload do Vercel: 3 MB por mídia local, com validação servidor/cliente consistente.
+- Mídia local de posts e miniaturas deixou de trafegar no JSON do feed: endpoints dedicados usam resposta binária e Range para mídia de vídeo/áudio.
+- Imagens de perfil repetidas em cards, comentários, notificações e conversas agora usam endpoint de mídia dedicado, evitando repetir base64 em grandes respostas.
+- Upload de GIF/WebP do perfil corrigido e URLs externas passaram a exigir protocolo e extensão compatíveis com o tipo declarado.
+- Mídias de perfil sem alteração não são reenviadas ao salvar configurações, preservando compatibilidade com arquivos legados e reduzindo payload.
+- Removido o mascote e todas as referências de arquivos do mascote.
+- Removida a release note de V18 e a migração foi renomeada para V15–V17.
+- Corrigida a estrutura responsiva do cabeçalho/ações do perfil.
+- Corrigidos limites e overflow de mídia no mobile.
+- Adicionada aba de vídeos no feed.
+- Players de áudio/vídeo passaram a tratar erro de carregamento e respeitar largura máxima.
+- Composer revisado para upload, URLs diretas e preview de mídia.
+- Modais e sheets receberam limites de viewport e safe-area melhores para celulares.
+- Criado retry controlado para mutações que recebem `Unauthorized`, com refresh de sessão limitado a 4 segundos.
+- Aplicado retry em ações críticas de perfil, publicação, moderação, cargos e comunicados.
+- Comunicados globais passaram a depender diretamente da permissão de liderança, sem depender da presença do usuário no grupo de Fundadores.
+- Loading inicial deixou de poder ficar indefinidamente preso: após 8 segundos há uma tela de recuperação.
+- Nomes locais relacionados a provedores sociais foram generalizados (`SOCIAL_PROVIDERS`). Contratos externos de autenticação foram preservados para não quebrar o deploy.
 
-## Variáveis de ambiente
-As variáveis obrigatórias/operacionais documentadas continuam:
-`DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`,
-`NYXOSHI_FOUNDER_1_EMAIL`, `NYXOSHI_FOUNDER_2_EMAIL`,
-`NYXOSHI_FOUNDER_3_EMAIL`, `NYXOSHI_ANGEL_GIRL_EMAIL`,
-`NYXOSHI_SUPREME_ARCHMAGE_EMAIL`, `NYXOSHI_HARDWARE_SCIENTIST_EMAIL`,
-`VITE_AUTH_ENABLED` e `VITE_SOCIAL_AUTH_ENABLED`.
-As variáveis de infraestrutura opcionais continuam somente quando o recurso correspondente for utilizado.
+## Verificações executadas
+- Parser TypeScript/TSX em todo o projeto: **0 diagnósticos de sintaxe**.
+- Verificação dos imports `@/...`: **0 imports ausentes**.
+- Testes Node existentes + novos testes de regressão: **205 testes, 201 pass, 0 falhas, 4 skips**.
+- Foram adicionados 10 testes estáticos V15–V17 para proteger limites, rotas de mídia, personalização, payloads e menções.
 
-## Verificações executadas neste pacote
-- Testes Node `scripts/*.test.mjs`: **216 testes, 212 aprovados, 0 falhas, 4 skips**.
-- `node --experimental-strip-types --check` nos principais módulos TypeScript de servidor: **0 erros de sintaxe**.
-- Verificação de nomes de arquivos relacionados a provedores/IA: **0 ocorrências**.
-- Revisão estática dos imports e do fluxo de perfil, mídia, auth e banco.
-- O build Vite/Nitro e o `npm audit` foram validados no computador do projeto conforme os resultados apresentados nesta conversa: build de produção concluído e `npm audit` terminou em **0 vulnerabilidades**.
+## Limitação do ambiente de auditoria
+As dependências npm não estavam instaladas no arquivo recebido e `npm ci --ignore-scripts --no-audit --no-fund --prefer-offline` excedeu o tempo disponível no ambiente. Portanto, `vite build`, `tsc`, ESLint e execução real do navegador não puderam ser executados aqui. O código foi validado por parsing TS/TSX (0 diagnósticos de sintaxe), análise estática dos imports locais (somente 2 imports especiais intencionais com `?raw`/`?url`), testes Node e revisão direcionada dos fluxos V15–V17.
 
-## Observação de deploy
-A aplicação usa PostgreSQL/Neon quando `DATABASE_URL` existe e PGlite como fallback. Para produção persistente, o deploy precisa usar a `DATABASE_URL` do banco real e executar as migrations do projeto durante o deploy.
+## Auditoria complementar — V13 + V15–V17
+
+- V13: endurecida a autorização no servidor para impedir alteração de cargos protegidos por chamadas forjadas; corrigida a remoção do acesso ao painel de denúncias para usar ID permanente; ações de perfil e mensagens foram ajustadas para mobile sem overflow de botões.
+- V13: a inicialização autenticada agora tem timeout de recuperação e o carregamento do perfil não permanece indefinidamente; falhas de sessão/perfil apresentam ação de recuperação.
+- V15: leituras de perfil público não sincronizam cargos como efeito colateral; perfil próprio não embute mídias Base64 grandes.
+- V16/V17: URLs `.webm`/`.ogg` ambíguas exigem tipo explícito; metadados de áudio/vídeo têm timeout para evitar travamentos em arquivos problemáticos.
+- V16/V17: mídia local do feed e miniaturas são servidas por endpoints próprios, reduzindo o tamanho das respostas.
+- Nenhum arquivo do pacote possui nome com `grok`, `gemini`, `openai`, `claude`, `llama` ou `mistral`; não houve renomeação artificial de arquivos nem alteração de nomes de cookies/hosts de serviços externos.
+
+### Validação
+
+A suíte estática de scripts executa 215 testes, com 211 aprovados, 0 falhas e 4 skips. O build completo e o typecheck dependente das bibliotecas do projeto não foram executados neste ambiente por ausência de `node_modules`.
+
