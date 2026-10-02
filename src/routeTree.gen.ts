@@ -10,59 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as HardwareLabRouteImport } from './routes/hardware-lab'
-import { Route as FoundersRouteImport } from './routes/founders'
-import { Route as FounderSecurityRouteImport } from './routes/founder-security'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as ModerationRouteImport } from './routes/moderation'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as CommunitiesRouteImport } from './routes/communities'
+import { Route as FounderSecurityRouteImport } from './routes/founder-security'
+import { Route as FoundersRouteImport } from './routes/founders'
+import { Route as HardwareLabRouteImport } from './routes/hardware-lab'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as ModerationRouteImport } from './routes/moderation'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiMediaPostIdRouteImport } from './routes/api/media.$postId'
+import { Route as ApiProfileMediaUserIdRouteImport } from './routes/api/profile-media.$userId'
 
-const HardwareLabRoute = HardwareLabRouteImport.update({
-  id: '/hardware-lab',
-  path: '/hardware-lab',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FoundersRoute = FoundersRouteImport.update({
-  id: '/founders',
-  path: '/founders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FounderSecurityRoute = FounderSecurityRouteImport.update({
-  id: '/founder-security',
-  path: '/founder-security',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModerationRoute = ModerationRouteImport.update({
-  id: '/moderation',
-  path: '/moderation',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesRoute = CommunitiesRouteImport.update({
@@ -70,9 +37,44 @@ const CommunitiesRoute = CommunitiesRouteImport.update({
   path: '/communities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FounderSecurityRoute = FounderSecurityRouteImport.update({
+  id: '/founder-security',
+  path: '/founder-security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoundersRoute = FoundersRouteImport.update({
+  id: '/founders',
+  path: '/founders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HardwareLabRoute = HardwareLabRouteImport.update({
+  id: '/hardware-lab',
+  path: '/hardware-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModerationRoute = ModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -100,179 +102,162 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMediaPostIdRoute = ApiMediaPostIdRouteImport.update({
+  id: '/api/media/$postId',
+  path: '/api/media/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfileMediaUserIdRoute = ApiProfileMediaUserIdRouteImport.update({
+  id: '/api/profile-media/$userId',
+  path: '/api/profile-media/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/hardware-lab': typeof HardwareLabRoute
-  '/founders': typeof FoundersRoute
-  '/founder-security': typeof FounderSecurityRoute
-  '/reports': typeof ReportsRoute
-  '/moderation': typeof ModerationRoute
-  '/login': typeof LoginRoute
-  '/notifications': typeof NotificationsRoute
   '/communities': typeof CommunitiesRoute
+  '/founder-security': typeof FounderSecurityRoute
+  '/founders': typeof FoundersRoute
+  '/hardware-lab': typeof HardwareLabRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
+  '/moderation': typeof ModerationRoute
+  '/notifications': typeof NotificationsRoute
+  '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/media/$postId': typeof ApiMediaPostIdRoute
+  '/api/profile-media/$userId': typeof ApiProfileMediaUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/hardware-lab': typeof HardwareLabRoute
-  '/founders': typeof FoundersRoute
-  '/founder-security': typeof FounderSecurityRoute
-  '/reports': typeof ReportsRoute
-  '/moderation': typeof ModerationRoute
-  '/login': typeof LoginRoute
-  '/notifications': typeof NotificationsRoute
   '/communities': typeof CommunitiesRoute
+  '/founder-security': typeof FounderSecurityRoute
+  '/founders': typeof FoundersRoute
+  '/hardware-lab': typeof HardwareLabRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
+  '/moderation': typeof ModerationRoute
+  '/notifications': typeof NotificationsRoute
+  '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/media/$postId': typeof ApiMediaPostIdRoute
+  '/api/profile-media/$userId': typeof ApiProfileMediaUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/hardware-lab': typeof HardwareLabRoute
   '/': typeof IndexRoute
-  '/founders': typeof FoundersRoute
-  '/founder-security': typeof FounderSecurityRoute
-  '/reports': typeof ReportsRoute
-  '/moderation': typeof ModerationRoute
-  '/login': typeof LoginRoute
-  '/notifications': typeof NotificationsRoute
   '/communities': typeof CommunitiesRoute
+  '/founder-security': typeof FounderSecurityRoute
+  '/founders': typeof FoundersRoute
+  '/hardware-lab': typeof HardwareLabRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
+  '/moderation': typeof ModerationRoute
+  '/notifications': typeof NotificationsRoute
+  '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/media/$postId': typeof ApiMediaPostIdRoute
+  '/api/profile-media/$userId': typeof ApiProfileMediaUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/hardware-lab'
     | '/'
-    | '/founders'
-    | '/founder-security'
-    | '/reports'
-    | '/moderation'
-    | '/login'
-    | '/notifications'
     | '/communities'
+    | '/founder-security'
+    | '/founders'
+    | '/hardware-lab'
+    | '/login'
     | '/messages'
+    | '/moderation'
+    | '/notifications'
+    | '/reports'
     | '/search'
     | '/settings'
     | '/post/$postId'
     | '/u/$username'
     | '/api/auth/$'
+    | '/api/media/$postId'
+    | '/api/profile-media/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/hardware-lab'
     | '/'
-    | '/founders'
-    | '/founder-security'
-    | '/reports'
-    | '/moderation'
-    | '/login'
-    | '/notifications'
     | '/communities'
+    | '/founder-security'
+    | '/founders'
+    | '/hardware-lab'
+    | '/login'
     | '/messages'
+    | '/moderation'
+    | '/notifications'
+    | '/reports'
     | '/search'
     | '/settings'
     | '/post/$postId'
     | '/u/$username'
     | '/api/auth/$'
+    | '/api/media/$postId'
+    | '/api/profile-media/$userId'
   id:
     | '__root__'
-    | '/hardware-lab'
     | '/'
-    | '/founders'
-    | '/founder-security'
-    | '/reports'
-    | '/login'
-    | '/notifications'
     | '/communities'
+    | '/founder-security'
+    | '/founders'
+    | '/hardware-lab'
+    | '/login'
     | '/messages'
+    | '/moderation'
+    | '/notifications'
+    | '/reports'
     | '/search'
     | '/settings'
     | '/post/$postId'
     | '/u/$username'
     | '/api/auth/$'
+    | '/api/media/$postId'
+    | '/api/profile-media/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  HardwareLabRoute: typeof HardwareLabRoute
   IndexRoute: typeof IndexRoute
-  LoginRoute: typeof LoginRoute
-  NotificationsRoute: typeof NotificationsRoute
   CommunitiesRoute: typeof CommunitiesRoute
+  FounderSecurityRoute: typeof FounderSecurityRoute
+  FoundersRoute: typeof FoundersRoute
+  HardwareLabRoute: typeof HardwareLabRoute
+  LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
+  ModerationRoute: typeof ModerationRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ReportsRoute: typeof ReportsRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
-  FoundersRoute: typeof FoundersRoute
-  FounderSecurityRoute: typeof FounderSecurityRoute
-  ReportsRoute: typeof ReportsRoute
-  ModerationRoute: typeof ModerationRoute
   PostPostIdRoute: typeof PostPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiMediaPostIdRoute: typeof ApiMediaPostIdRoute
+  ApiProfileMediaUserIdRoute: typeof ApiProfileMediaUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/hardware-lab': {
-      id: '/hardware-lab'
-      path: '/hardware-lab'
-      fullPath: '/hardware-lab'
-      preLoaderRoute: typeof HardwareLabRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/founders': {
-      id: '/founders'
-      path: '/founders'
-      fullPath: '/founders'
-      preLoaderRoute: typeof FoundersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/founder-security': {
-      id: '/founder-security'
-      path: '/founder-security'
-      fullPath: '/founder-security'
-      preLoaderRoute: typeof FounderSecurityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/moderation': {
-      id: '/moderation'
-      path: '/moderation'
-      fullPath: '/moderation'
-      preLoaderRoute: typeof ModerationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities': {
@@ -282,6 +267,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/founder-security': {
+      id: '/founder-security'
+      path: '/founder-security'
+      fullPath: '/founder-security'
+      preLoaderRoute: typeof FounderSecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/founders': {
+      id: '/founders'
+      path: '/founders'
+      fullPath: '/founders'
+      preLoaderRoute: typeof FoundersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hardware-lab': {
+      id: '/hardware-lab'
+      path: '/hardware-lab'
+      fullPath: '/hardware-lab'
+      preLoaderRoute: typeof HardwareLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages': {
       id: '/messages'
       path: '/messages'
@@ -289,11 +302,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/moderation': {
+      id: '/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof ModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/notifications': {
       id: '/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -331,25 +358,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/media/$postId': {
+      id: '/api/media/$postId'
+      path: '/api/media/$postId'
+      fullPath: '/api/media/$postId'
+      preLoaderRoute: typeof ApiMediaPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profile-media/$userId': {
+      id: '/api/profile-media/$userId'
+      path: '/api/profile-media/$userId'
+      fullPath: '/api/profile-media/$userId'
+      preLoaderRoute: typeof ApiProfileMediaUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  HardwareLabRoute: HardwareLabRoute,
   IndexRoute: IndexRoute,
-  FoundersRoute: FoundersRoute,
-  FounderSecurityRoute: FounderSecurityRoute,
-  ReportsRoute: ReportsRoute,
-  ModerationRoute: ModerationRoute,
-  LoginRoute: LoginRoute,
-  NotificationsRoute: NotificationsRoute,
   CommunitiesRoute: CommunitiesRoute,
+  FounderSecurityRoute: FounderSecurityRoute,
+  FoundersRoute: FoundersRoute,
+  HardwareLabRoute: HardwareLabRoute,
+  LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
+  ModerationRoute: ModerationRoute,
+  NotificationsRoute: NotificationsRoute,
+  ReportsRoute: ReportsRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   PostPostIdRoute: PostPostIdRoute,
   UUsernameRoute: UUsernameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiMediaPostIdRoute: ApiMediaPostIdRoute,
+  ApiProfileMediaUserIdRoute: ApiProfileMediaUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
