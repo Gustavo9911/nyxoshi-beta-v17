@@ -23,12 +23,18 @@ test("V15 migration contains every persisted personalization field", () => {
   ]) assert.match(migration, new RegExp(`add column if not exists ${field}`));
 });
 
-test("V15 public profile hydration exposes the persisted personalization", () => {
+test("V15 public profile endpoint exposes persisted personalization without extra hydration round-trips", () => {
   for (const field of [
     "theme_id", "background_id", "background_url", "profile_effect",
     "profile_intro", "profile_intro_enabled", "accent_color",
   ]) assert.ok(server.includes(field), `missing ${field}`);
-  assert.match(server, /return hydrateProfile\(sql, rows\[0\], context\.userId\);/);
+  assert.match(server, /type PublicProfileRow = ProfileRow &/);
+  assert.match(server, /function mapPublicProfile\(row: PublicProfileRow, viewerId: string \| null\)/);
+  assert.match(server, /export const getProfileByUsername = createServerFn\(\{ method: "GET" \}\)/);
+  assert.match(server, /\[viewerId, username\]/);
+  assert.match(server, /p\.username = \$2/);
+  assert.match(server, /f\.follower_id = \$1 and f\.following_id = p\.user_id/);
+  assert.match(server, /return mapPublicProfile\(rows\[0\], viewerId\);/);
 });
 
 test("V15 profile media is size-limited and aggregate-safe", () => {
@@ -85,4 +91,23 @@ test("media endpoints fail closed for deleted, shadow-banned, or blocked content
   assert.match(profileMediaRoute, /deleted_at is null/);
   assert.match(profileMediaRoute, /shadow_banned=true/);
   assert.match(profileMediaRoute, /from blocks/);
+});
+
+test("V13/V15: profile hydration is safe for single-connection PGlite", () => {
+  const start = server.indexOf("async function hydrateProfile");
+  const end = server.indexOf("type PublicProfileRow = ProfileRow &");
+  const hydrate = start >= 0 && end > start ? server.slice(start, end) : "";
+  assert.doesNotMatch(hydrate, /Promise\.all/);
+  assert.match(hydrate, /avoid issuing concurrent queries against it/i);
+});
+
+test("V17: relationship lookup indexes are present", () => {
+  const indexes = read("migrations/0012_v17_profile_query_indexes.sql");
+  for (const name of [
+    "follows_follower_id_idx",
+    "blocks_blocker_id_idx",
+    "blocks_blocked_id_idx",
+    "user_mutes_muter_id_idx",
+    "user_restrictions_restrictor_id_idx",
+  ]) assert.match(indexes, new RegExp(name));
 });

@@ -27,6 +27,26 @@ test("V13: mobile message tabs and profile actions use bounded layouts", () => {
   assert.match(p, /disabled=\{actionBusy !== null\}/);
 });
 
+
+
+test("V13: profile routes cannot remain in an infinite loading state", () => {
+  const p = read("src/routes/u.$username.tsx");
+  assert.match(p, /PROFILE_QUERY_TIMEOUT_MS\s*=\s*12_000/);
+  assert.match(p, /function withTimeout<T>\(promise: Promise<T>/);
+  assert.match(p, /queryFn: \(\) => withTimeout\(getProfileByUsername/);
+  assert.match(p, /retry: 1/);
+  assert.match(p, /refetchOnWindowFocus: false/);
+  assert.match(p, /Tentar novamente/);
+});
+
+
+
+test("V13: mobile profile actions keep both action groups full width", () => {
+  const css = read("src/styles.css");
+  assert.match(css, /\.profile-actions \{ display: block; width: 100%; min-width: 0; \}/);
+  assert.match(css, /\.profile-actions \.profile-primary-actions,\s*\.profile-actions \.profile-icon-actions \{ width: 100%; min-width: 0; \}/);
+});
+
 test("V13: auth/profile boot has recovery timeouts", () => {
   const shell = read("src/components/signed-shell.tsx");
   const me = read("src/hooks/use-me.ts");
@@ -35,11 +55,14 @@ test("V13: auth/profile boot has recovery timeouts", () => {
   assert.match(me, /PROFILE_BOOT_TIMEOUT_MS\s*=\s*12_000/);
 });
 
-test("V15: public profile reads do not sync roles and own profile avoids inline media", () => {
+test("V15: public profile reads avoid role mutation and use deterministic parameter ordering", () => {
   const s = read("src/lib/nyxoshi/server.ts");
-  const hydrate = s.slice(s.indexOf("async function hydrateProfile"), s.indexOf("export const ensureMyProfile"));
-  assert.match(hydrate, /const role = await getRole\(sql, row\.user_id\)/);
-  assert.doesNotMatch(hydrate, /syncRoleForUser/);
+  const profile = s.slice(s.indexOf("export const getProfileByUsername"), s.indexOf("export const getProfilePosts"));
+  assert.match(profile, /const viewerId = context\.userId \?\? null/);
+  assert.match(profile, /\[viewerId, username\]/);
+  assert.match(profile, /p\.username = \$2/);
+  assert.match(profile, /p\.user_id = \$1/);
+  assert.doesNotMatch(profile, /syncRoleForUser/);
   assert.match(s, /hydrateProfile\(sql, row, context\.userId, \{ inlineMedia: false \}\)/);
 });
 

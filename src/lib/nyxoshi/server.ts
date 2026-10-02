@@ -10,7 +10,7 @@ import type {
   Profile,
 } from "./types";
 import { slugifyUsername } from "./usernames";
-import { getRole, requireFounder, requireAngelGirl, requireHardwareScientist, requireReportModerator, requireModerationAdmin, requireRole, syncRoleForUser } from "./roles";
+import { getRole, requireFounder, requireAngelGirl, requireHardwareScientist, requireReportModerator, requireModerationAdmin, requireRole, syncRoleForUser, type NyxoshiRole } from "./roles";
 import {
   createCommentSchema,
   createPostSchema,
@@ -351,10 +351,12 @@ async function hydrateProfile(
   viewerId: string | null,
   options: { inlineMedia?: boolean } = {},
 ): Promise<Profile> {
-  // Public/profile reads must not mutate role assignments. Synchronization is
-  // reserved for the authenticated actor so a profile view cannot demote or
-  // rewrite another user's role as a side effect.
+  // Do not synchronize role assignments while merely rendering another user's
+  // profile. Role synchronization is reserved for authenticated actor flows.
   const role = await getRole(sql, row.user_id);
+
+  // Keep this path compatible with both Neon and the PGlite fallback: PGlite is
+  // single-connection, so avoid issuing concurrent queries against it.
   const [followers] = await sql<{ n: number }>`
     select count(*)::int as n from follows where following_id = ${row.user_id}
   `;
@@ -364,16 +366,28 @@ async function hydrateProfile(
   const [posts] = await sql<{ n: number }>`
     select count(*)::int as n from posts where user_id = ${row.user_id} and deleted_at is null
   `;
+
   const isSelf = viewerId === row.user_id;
   let isFollowing = false;
   let isBlocked = false;
   if (viewerId && !isSelf) {
-    const follow = await sql`select 1 from follows where follower_id = ${viewerId} and following_id = ${row.user_id} limit 1`;
+    const follow = await sql`
+      select 1 from follows
+      where follower_id = ${viewerId} and following_id = ${row.user_id}
+      limit 1
+    `;
     isFollowing = follow.length > 0;
-    const block = await sql`select 1 from blocks where blocker_id = ${viewerId} and blocked_id = ${row.user_id} limit 1`;
+    const block = await sql`
+      select 1 from blocks
+      where (blocker_id = ${viewerId} and blocked_id = ${row.user_id})
+         or (blocker_id = ${row.user_id} and blocked_id = ${viewerId})
+      limit 1
+    `;
     isBlocked = block.length > 0;
   }
-  const permanentId = row.permanent_id ?? (await sql<{permanent_id:string}>`select permanent_id from profiles where user_id=${row.user_id} limit 1`)[0]?.permanent_id ?? row.user_id;
+
+  // permanent_id is part of the row in V10+, so never issue a second lookup.
+  const permanentId = row.permanent_id ?? row.user_id;
   const inlineMedia = options.inlineMedia === true;
   return {
     userId: row.user_id,
@@ -386,7 +400,6 @@ async function hydrateProfile(
     websiteUrl: row.website_url,
     themeId: row.theme_id ?? "nyxoshi",
     backgroundId: row.background_id ?? "stars",
-    backgroundUrl: profileMediaUrl(row.background_url, row.user_id, "background", inlineMedia),
     profileEffect: row.profile_effect ?? "glow",
     profileIntro: row.profile_intro ?? "moonrise",
     profileIntroEnabled: Boolean(row.profile_intro_enabled ?? true),
@@ -613,24 +626,105 @@ export const createComment = createServerFn({ method: "POST" })
     return { id };
   });
 
+type PublicProfileRow = ProfileRow & {
+  role: NyxoshiRole;
+  founder_number: number | null;
+  followers_count: number;
+  following_count: number;
+  posts_count: number;
+  is_following: boolean;
+  is_blocked: boolean;
+};
+
+function mapPublicProfile(row: PublicProfileRow, viewerId: string | null): Profile {
+  const isSelf = viewerId === row.user_id;
+  return {
+    userId: row.user_id,
+    username: row.username,
+    displayName: row.display_name,
+    bio: row.bio ?? "",
+    image: profileMediaUrl(row.image, row.user_id, "image"),
+    bannerUrl: profileMediaUrl(row.banner_url, row.user_id, "banner"),
+    profileGifUrl: profileMediaUrl(row.profile_gif_url, row.user_id, "gif"),
+    websiteUrl: row.website_url,
+    themeId: row.theme_id ?? "nyxoshi",
+    backgroundId: row.background_id ?? "stars",
+    profileEffect: row.profile_effect ?? "glow",
+    profileIntro: row.profile_intro ?? "moonrise",
+    profileIntroEnabled: Boolean(row.profile_intro_enabled ?? true),
+    accentColor: row.accent_color ?? "#c084fc",
+    permanentId: row.permanent_id ?? row.user_id,
+    role: row.role || "user",
+    founderNumber: row.founder_number ?? null,
+    createdAt: asIso(row.created_at),
+    followers: Number(row.followers_count) || 0,
+    following: Number(row.following_count) || 0,
+    posts: Number(row.posts_count) || 0,
+    isFollowing: Boolean(row.is_following),
+    isBlocked: isSelf ? false : Boolean(row.is_blocked),
+    isSelf,
+  };
+}
+
 export const getProfileByUsername = createServerFn({ method: "GET" })
   .middleware([optionalAuthMiddleware])
   .validator((username: string) => username.trim().toLowerCase())
   .handler(async ({ context, data: username }) => {
     const sql = await getSql();
-    const rows = await sql<ProfileRow>`
-      select user_id, username, display_name, bio, image, banner_url, profile_gif_url, website_url, theme_id, background_id, background_url, profile_effect, profile_intro, profile_intro_enabled, accent_color, permanent_id, created_at::text as created_at
-      from profiles
-      where username = ${username}
-        and deleted_at is null
-        and (${context.userId ?? null} is not null or not exists (select 1 from user_roles sr where sr.user_id=profiles.user_id and sr.shadow_banned=true))
-        and (${context.userId ?? null} is null or not exists (
-          select 1 from user_roles sr where sr.user_id=profiles.user_id and sr.shadow_banned=true and profiles.user_id <> ${context.userId}
-        ))
+    const viewerId = context.userId ?? null;
+
+    // Keep parameter order explicit: $1 is always the viewer ID and $2 is
+    // always the username. This prevents authenticated profile requests from
+    // accidentally comparing a username against the user_id column.
+    const rows = await sql.query<PublicProfileRow>(
+      `
+      select
+        p.user_id,
+        p.username,
+        p.display_name,
+        p.bio,
+        p.image,
+        p.banner_url,
+        p.profile_gif_url,
+        p.website_url,
+        p.theme_id,
+        p.background_id,
+        p.background_url,
+        p.profile_effect,
+        p.profile_intro,
+        p.profile_intro_enabled,
+        p.accent_color,
+        p.permanent_id,
+        p.created_at::text as created_at,
+        coalesce(ur.role, 'user') as role,
+        ur.founder_number,
+        (select count(*)::int from follows f where f.following_id = p.user_id) as followers_count,
+        (select count(*)::int from follows f where f.follower_id = p.user_id) as following_count,
+        (select count(*)::int from posts po where po.user_id = p.user_id and po.deleted_at is null) as posts_count,
+        exists(
+          select 1 from follows f
+          where f.follower_id = $1 and f.following_id = p.user_id
+        ) as is_following,
+        exists(
+          select 1 from blocks b
+          where (b.blocker_id = $1 and b.blocked_id = p.user_id)
+             or (b.blocker_id = p.user_id and b.blocked_id = $1)
+        ) as is_blocked
+      from profiles p
+      left join user_roles ur on ur.user_id = p.user_id
+      where p.username = $2
+        and p.deleted_at is null
+        and (
+          coalesce(ur.shadow_banned, false) = false
+          or p.user_id = $1
+        )
       limit 1
-    `;
+      `,
+      [viewerId, username],
+    );
+
     if (!rows[0]) return null;
-    return hydrateProfile(sql, rows[0], context.userId);
+    return mapPublicProfile(rows[0], viewerId);
   });
 
 export const getProfilePosts = createServerFn({ method: "GET" })

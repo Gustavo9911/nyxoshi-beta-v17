@@ -314,9 +314,11 @@ html, body, #root { max-width: 100%; min-width: 0; }
   .nyx-mobile-nav > * { min-width: 0; }
   .profile-theme .profile-cover { height: 9rem; }
   .profile-theme .profile-intro { padding: 1.5rem; }
-  .profile-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .profile-actions > a, .profile-actions > button:first-child, .profile-actions > button:nth-child(2) { grid-column: span 2; }
-  .profile-actions > button { min-width: 0; }
+  .profile-actions { display: block; width: 100%; min-width: 0; }
+  .profile-actions .profile-primary-actions,
+  .profile-actions .profile-icon-actions { width: 100%; min-width: 0; }
+  .profile-actions .profile-primary-actions > *,
+  .profile-actions .profile-icon-actions > * { min-width: 0; }
   .feed-tabs { font-size: .78rem; }
 }
 
