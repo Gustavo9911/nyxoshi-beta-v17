@@ -1,0 +1,136 @@
+
+**PROMPT COMPLETO PARA O GROK – PROJETO NYXOSHI**
+
+Você é o responsável técnico por transformar a ideia da rede social **Nyxoshi** em um projeto de software real, funcional e executável.
+
+### Contexto
+- Nome oficial: **Nyxoshi**
+- Objetivo: Rede social moderna e independente (não é clone de Threads ou qualquer outra plataforma)
+- Prioridade: MVP limpo, seguro, mobile-first e preparado para crescer
+- Stack obrigatória:
+  - Next.js 15 (App Router)
+  - TypeScript
+  - Tailwind CSS + shadcn/ui
+  - Drizzle ORM
+  - PostgreSQL
+  - better-auth
+  - Zod
+  - pnpm (preferencial)
+
+### Princípios
+- Código limpo e organizado
+- Segurança desde o início
+- Sem overengineering
+- Uma funcionalidade por vez
+- Nunca confiar no frontend para autorização
+- Usar variáveis de ambiente
+- Testar após implementações importantes
+
+### Ordem de Fases
+1. Fundação (setup completo)
+2. Autenticação + Perfil
+3. Posts + Feed + Curtidas + Comentários
+4. Seguir + Feed Seguindo + Notificações
+5. Pesquisa + Bloqueio/Denúncias (estrutura)
+6. Polimento + Testes + Responsividade
+
+---
+
+### FASE 1 – FUNDAÇÃO (COMECE POR AQUI)
+
+Execute a Fase 1 completa com os seguintes requisitos:
+
+#### 1. Inicialização do Projeto
+- Crie o projeto Next.js 15 com App Router, TypeScript e Tailwind.
+- Use pnpm.
+- Configure o alias `@/` corretamente.
+
+#### 2. Estrutura de Pastas
+Organize o projeto desta forma:
+
+```bash
+nyxoshi/
+├── app/
+├── components/
+│   └── ui/
+├── db/
+│   ├── schema.ts
+│   └── index.ts
+├── lib/
+│   ├── auth.ts
+│   ├── db.ts
+│   └── validations/
+├── server/
+├── types/
+├── hooks/
+├── public/
+├── tests/
+├── docker-compose.yml
+├── drizzle.config.ts
+├── .env.example
+└── README.md
+```
+
+#### 3. Docker + PostgreSQL
+Crie um `docker-compose.yml` simples e funcional com PostgreSQL.
+
+#### 4. Drizzle ORM
+- Configure o Drizzle corretamente.
+- Crie o arquivo `db/schema.ts` com as tabelas iniciais:
+
+**Tabelas mínimas da Fase 1:**
+- `user`
+- `session`
+- `account` (caso o better-auth precise)
+- `verification` (caso o better-auth precise)
+
+Campos importantes do `user`:
+- id (uuid ou text)
+- name
+- email (unique)
+- emailVerified
+- image
+- username (unique)
+- displayUsername
+- bio
+- createdAt
+- updatedAt
+- deletedAt (soft delete)
+
+#### 5. better-auth
+- Configure o better-auth de forma limpa e segura.
+- Use sessão em banco de dados.
+- Configure cookies seguros.
+- Deixe preparado para email/password.
+
+#### 6. Variáveis de Ambiente
+Crie um `.env.example` completo com todas as variáveis necessárias (DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, etc.).
+
+#### 7. README.md
+Escreva um README claro contendo:
+- O que é o projeto
+- Stack utilizada
+- Como subir o banco com Docker
+- Como instalar dependências
+- Como rodar as migrations
+- Como iniciar o servidor de desenvolvimento
+- Variáveis de ambiente necessárias
+
+#### 8. Resultado Esperado da Fase 1
+Ao final desta fase, o projeto deve:
+- Compilar sem erros
+- Subir o PostgreSQL via Docker
+- Conectar corretamente com o Drizzle
+- Ter o better-auth configurado
+- Rodar com `pnpm dev` sem quebrar
+
+---
+
+### Instruções de Execução
+- Trabalhe de forma incremental e explique o que está fazendo.
+- Após concluir a Fase 1, me avise claramente:
+  - O que foi implementado
+  - Como eu posso rodar o projeto localmente
+  - Se houve algum problema
+
+Pode começar agora pela **Fase 1**.

@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Nyxoshi",
+      "hasCanvas": false,
+      "bodyTextLen": 486,
+      "bodyTextHash": "7daa76671e4d0080d7bcc8cc49d3720a5ef47bdb69e6e76f645dbb32a15727b9",
+      "bodyTextPrefix": "Nyxoshi Entrar REDE SOCIAL INDEPENDENTE A noite pertence a quem ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Nyxoshi",
+      "hasCanvas": false,
+      "bodyTextLen": 376,
+      "bodyTextHash": "dfa39d17e9041e235bb83501f26d4a21fd2ebd7ebd9a5fb0f3c73a121a9de9b4",
+      "bodyTextPrefix": "Nyxoshi Entrar REDE SOCIAL INDEPENDENTE A noite pertence a quem ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
